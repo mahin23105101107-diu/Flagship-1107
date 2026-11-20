@@ -1,0 +1,16 @@
+# Stage 1: Build Java 21 Spring Boot Modular Monolith
+FROM maven:3.9-eclipse-temurin-21-alpine AS builder
+WORKDIR /workspace
+COPY pom.xml .
+COPY flagship-shared ./flagship-shared
+COPY flagship-server ./flagship-server
+COPY flagship-sdk ./flagship-sdk
+COPY flagship-sample-app ./flagship-sample-app
+RUN mvn -pl flagship-server -am clean package -DskipTests
+
+# Stage 2: Minimal JRE 21 runtime (fits easily on 8 GB RAM laptop per C1)
+FROM eclipse-temurin:21-jre-alpine
+WORKDIR /app
+COPY --from=builder /workspace/flagship-server/target/flagship-server-*.jar app.jar
+EXPOSE 8080
+ENTRYPOINT ["java", "-XX:MaxRAMPercentage=75.0", "-jar", "app.jar"]

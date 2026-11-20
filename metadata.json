@@ -1,0 +1,6 @@
+{
+  "name": "FlagShip",
+  "description": "Self-hosted feature flag and gradual rollout platform with deterministic targeting, SSE live updates, offline-resilient Spring Boot Starter SDK, approval workflows, and experiment analytics.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

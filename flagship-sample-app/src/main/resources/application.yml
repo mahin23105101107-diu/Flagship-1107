@@ -1,0 +1,16 @@
+server:
+  port: 8085
+
+flagship:
+  server-url: ${FLAGSHIP_SERVER_URL:http://localhost:3000}
+  sdk-key: ${FLAGSHIP_SDK_KEY:fs_prod_com_9f44c1d8a7e2}
+  startup-timeout-ms: 1500
+  snapshot-path: ./data/sample-app-snapshot.json
+  sse-enabled: true
+  polling-fallback-interval-ms: 30000
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,flagship,metrics

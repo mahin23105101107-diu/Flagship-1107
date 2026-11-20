@@ -1,0 +1,55 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: flagship-postgres
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-flagship}
+      POSTGRES_USER: ${POSTGRES_USER:-flagship}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-flagship_dev_pass}
+    ports:
+      - "5432:5432"
+    volumes:
+      - flagship_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-flagship}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  flagship-server:
+    build:
+      context: .
+      dockerfile: Dockerfile.backend
+    container_name: flagship-server
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-docker}
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/${POSTGRES_DB:-flagship}
+      SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER:-flagship}
+      SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD:-flagship_dev_pass}
+      FLAGSHIP_JWT_SECRET: ${FLAGSHIP_JWT_SECRET:-change-me-in-production-32bytes-min}
+    ports:
+      - "8080:8080"
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:8080/actuator/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  flagship-frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile.frontend
+    container_name: flagship-frontend
+    depends_on:
+      - flagship-server
+    environment:
+      PORT: 3000
+      NODE_ENV: production
+    ports:
+      - "3000:3000"
+
+volumes:
+  flagship_pgdata:
