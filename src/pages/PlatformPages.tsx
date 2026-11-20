@@ -9,7 +9,8 @@ import {
   Wifi,
   WifiOff,
 } from 'lucide-react';
-import { apiRequest } from '../api/client';
+import { apiRequest, isStaticMode } from '../api/client';
+import { localSdkFetch } from '../api/localBackend';
 import { EvaluationContextBuilder } from '../engine/evaluation';
 import { FlagShipClient, MemorySnapshotStorage } from '../engine/sdkClient';
 import type {
@@ -248,7 +249,9 @@ export const SdkSetupPage: React.FC<SdkSetupPageProps> = ({
         ? ((async () => {
             throw new Error('Simulated Server Outage (ECONNREFUSED)');
           }) as typeof fetch)
-        : fetch.bind(window),
+        : isStaticMode()
+          ? localSdkFetch
+          : fetch.bind(window),
     });
 
     const synced = await client.initialize();
@@ -475,7 +478,7 @@ export const SystemHealthPage: React.FC<SystemHealthPageProps> = ({ refreshSigna
         </div>
         <div className="flex items-center gap-2">
           <a
-            href="/api/v1/openapi.json"
+            href={isStaticMode() ? './openapi.json' : '/api/v1/openapi.json'}
             target="_blank"
             rel="noreferrer"
             className="inline-flex items-center gap-1.5 px-3 py-2 rounded-md border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-xs font-medium hover:bg-slate-50 dark:hover:bg-slate-800"

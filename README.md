@@ -47,6 +47,19 @@ docker compose up --build
 
 ---
 
+## Going Live on GitHub Pages
+
+FlagShip includes an automated GitHub Actions deployment workflow (`.github/workflows/deploy-pages.yml`) and a browser-native runtime engine (`src/api/localBackend.ts`) so all 18 dashboard pages, RBAC roles, sticky MurmurHash3 rollouts, production self-approval guards, experiment analytics (Z-test + Chi-square SRM), stale flag hygiene, and the interactive SDK offline simulator run live on GitHub Pages with `localStorage` persistence—no separate backend server required.
+
+### Enable GitHub Pages (3 Steps)
+1. Push this repository to the `main` branch on GitHub.
+2. Open your repository on GitHub and go to **Settings → Pages**.
+3. Under **Build and deployment → Source**, select **GitHub Actions**.
+
+Every push to `main` (or manual trigger in **Actions → Deploy FlagShip to GitHub Pages**) builds with `npm run build:pages` (relative `./` asset paths, `404.html`, and `.nojekyll`) and publishes your live site at `https://<username>.github.io/<repository>/`.
+
+---
+
 ## QA5 — 15-Minute Spring Boot Starter Integration Guide
 
 1. Add the starter dependency to your Spring Boot `pom.xml`:

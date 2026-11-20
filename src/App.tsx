@@ -4,8 +4,10 @@ import {
   clearAuthSession,
   getStoredToken,
   getStoredUser,
+  isStaticMode,
   saveAuthSession,
 } from './api/client';
+import { subscribeLocalEvents } from './api/localBackend';
 import { Layout, type NavPage, type ToastMessage } from './components/Layout';
 import { ExperimentAnalyticsPage, FlagHygienePage } from './pages/AnalyticsHygienePages';
 import { DashboardOverview } from './pages/DashboardOverview';
@@ -131,9 +133,20 @@ export default function App() {
     void loadWorkspaceMeta();
   }, [loadWorkspaceMeta, refreshSignal]);
 
-  // Live SSE EventSource connection for real-time updates (FR5)
+  // Live SSE EventSource connection for real-time updates (FR5), with in-browser bus on GitHub Pages
   useEffect(() => {
     if (!user) return;
+    if (isStaticMode()) {
+      setSseConnected(true);
+      const unsub = subscribeLocalEvents(() => {
+        setRefreshSignal((n) => n + 1);
+      });
+      return () => {
+        unsub();
+        setSseConnected(false);
+      };
+    }
+
     const es = new EventSource('/api/v1/sdk/stream?scope=dashboard');
     es.onopen = () => setSseConnected(true);
     es.onerror = () => setSseConnected(false);

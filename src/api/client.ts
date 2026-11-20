@@ -1,4 +1,5 @@
 import type { PublicUser } from '../types/flagship';
+import { handleLocalApiRequest } from './localBackend';
 
 const TOKEN_KEY = 'flagship_auth_token';
 const USER_KEY = 'flagship_auth_user';
@@ -17,6 +18,17 @@ export class ApiError extends Error {
     this.status = status;
     this.title = title;
   }
+}
+
+let runtimeStaticFallback = false;
+
+export function isStaticMode(): boolean {
+  if (runtimeStaticFallback) return true;
+  if (import.meta.env.VITE_STATIC_MODE === 'true') return true;
+  if (typeof window !== 'undefined' && window.location.hostname.endsWith('.github.io')) {
+    return true;
+  }
+  return false;
 }
 
 export function getStoredToken(): string | null {
@@ -54,6 +66,22 @@ export function clearAuthSession(): void {
   }
 }
 
+async function runLocalRequest<T>(
+  path: string,
+  options: RequestInit,
+  headers: Record<string, string>,
+): Promise<T> {
+  try {
+    return await handleLocalApiRequest<T>(path, options, headers);
+  } catch (err) {
+    if (err && typeof err === 'object' && 'status' in err && 'title' in err) {
+      const e = err as { status: number; title: string; message: string };
+      throw new ApiError(e.status, e.title, e.message);
+    }
+    throw new ApiError(500, 'Local Engine Error', err instanceof Error ? err.message : 'Request failed');
+  }
+}
+
 export async function apiRequest<T>(
   path: string,
   options: RequestInit = {},
@@ -66,10 +94,26 @@ export async function apiRequest<T>(
     ...((options.headers as Record<string, string>) || {}),
   };
 
-  const res = await fetch(`/api/v1${path}`, {
-    ...options,
-    headers,
-  });
+  if (isStaticMode()) {
+    return runLocalRequest<T>(path, options, headers);
+  }
+
+  let res: Response;
+  try {
+    res = await fetch(`/api/v1${path}`, {
+      ...options,
+      headers,
+    });
+  } catch {
+    runtimeStaticFallback = true;
+    return runLocalRequest<T>(path, options, headers);
+  }
+
+  const contentType = res.headers.get('content-type') || '';
+  if (res.status === 404 && !contentType.includes('application/json')) {
+    runtimeStaticFallback = true;
+    return runLocalRequest<T>(path, options, headers);
+  }
 
   if (!res.ok) {
     let body: ProblemDetails = {};

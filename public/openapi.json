@@ -1,0 +1,135 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "FlagShip Platform REST API",
+    "version": "1.0.0",
+    "description": "Self-hosted Feature Flag and Gradual Rollout Platform API with deterministic targeting, SSE live push, approvals, and experiment analytics."
+  },
+  "servers": [
+    {
+      "url": "/api/v1"
+    }
+  ],
+  "paths": {
+    "/auth/login": {
+      "post": {
+        "summary": "Authenticate user and issue JWT"
+      }
+    },
+    "/projects": {
+      "get": {
+        "summary": "List projects"
+      },
+      "post": {
+        "summary": "Create project"
+      }
+    },
+    "/environments": {
+      "get": {
+        "summary": "List environments"
+      },
+      "post": {
+        "summary": "Create environment"
+      }
+    },
+    "/flags": {
+      "get": {
+        "summary": "List feature flags (paginated)"
+      },
+      "post": {
+        "summary": "Create feature flag"
+      }
+    },
+    "/flags/{flagId}/config/{envId}": {
+      "put": {
+        "summary": "Update environment flag config or submit Production approval"
+      }
+    },
+    "/flags/{flagId}/kill-switch/{envId}": {
+      "post": {
+        "summary": "Instant kill-switch toggle (bypasses approval for incident response)"
+      }
+    },
+    "/flags/{flagId}/evaluate": {
+      "post": {
+        "summary": "Deterministic evaluation preview"
+      }
+    },
+    "/segments": {
+      "get": {
+        "summary": "List user segments"
+      },
+      "post": {
+        "summary": "Create segment"
+      }
+    },
+    "/approvals": {
+      "get": {
+        "summary": "List change requests"
+      }
+    },
+    "/approvals/{id}/approve": {
+      "post": {
+        "summary": "Approve production change (self-approval blocked)"
+      }
+    },
+    "/approvals/{id}/reject": {
+      "post": {
+        "summary": "Reject production change"
+      }
+    },
+    "/versions": {
+      "get": {
+        "summary": "List configuration version history"
+      }
+    },
+    "/versions/{id}/rollback": {
+      "post": {
+        "summary": "Rollback flag environment to prior version"
+      }
+    },
+    "/experiments": {
+      "get": {
+        "summary": "List experiments"
+      },
+      "post": {
+        "summary": "Create experiment"
+      }
+    },
+    "/analytics/experiments": {
+      "get": {
+        "summary": "Experiment analytics with z-test and Chi-square SRM"
+      }
+    },
+    "/events/batch": {
+      "post": {
+        "summary": "Ingest batched SDK exposure and conversion events"
+      }
+    },
+    "/sdk/snapshot": {
+      "get": {
+        "summary": "Download full environment snapshot for SDK local evaluation"
+      }
+    },
+    "/sdk/stream": {
+      "get": {
+        "summary": "Server-Sent Events (SSE) live update stream"
+      }
+    },
+    "/hygiene": {
+      "get": {
+        "summary": "Detect stale flags (>30d unevaluated or >=14d at 100%)"
+      }
+    },
+    "/audit": {
+      "get": {
+        "summary": "Paginated audit log"
+      }
+    },
+    "/health": {
+      "get": {
+        "summary": "Actuator-style health, readiness, and metrics"
+      }
+    }
+  }
+}

@@ -16,6 +16,7 @@
 - [x] **Phase 8**: Complete CSE 444 documentation (`README.md`, `docs/architecture.md`, `docs/database-design.md`, `docs/design-patterns.md`, `docs/utility-tree.md`, `docs/performance-report.md`, `docs/testing-guide.md`, `docs/ai-usage-log.md`, `docs/live-defence-guide.md`, and `docs/adr/ADR-001` through `ADR-004`)
 - [x] **Phase 9**: Final `compile_applet`, `lint_applet`, `npm test`, and browser verification passed with zero console errors
 - [x] **Phase 10 (CI Fix)**: Fixed both GitHub Actions CI jobs (`frontend-and-engine` missing `package-lock.json` for `setup-node` `cache: npm` / `npm ci`, and `java-backend-and-sdk` migration from `4.0.0-M2` milestone to Maven Central Spring Boot `4.0.0` GA, `spring-boot-starter-aspectj`, `spring-boot-starter-flyway`, Jackson 3 `tools.jackson.*`, `springdoc` `3.0.0`, and JUnit 6-safe core ArchUnit `1.4.1` with `.withOptionalLayers(true)`)
+- [x] **Phase 11 (GitHub Pages Live Deployment)**: Added browser-native static engine runtime (`src/api/localSeed.ts`, `src/api/localBackend.ts`), automatic static mode detection in `src/api/client.ts`, in-browser live event bus in `src/App.tsx`, static SDK snapshot adapter & `public/openapi.json`, relative `./` Vite base + `404.html`/`.nojekyll` output (`npm run build:pages`), and `.github/workflows/deploy-pages.yml`
 
 ## Measured QA Results
 - **QA1 Latency (10 rules)**: `p50=2.71µs`, `p95=7.92µs`, `p99=26.90µs` (Target `<= 50µs`) — PASS
