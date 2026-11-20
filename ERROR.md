@@ -44,5 +44,15 @@
   - Replaced `spring-boot-starter-aop` with `spring-boot-starter-aspectj` and `flyway-core` with `spring-boot-starter-flyway`, and added `spring-boot-maven-plugin` to `flagship-server/pom.xml`.
   - Migrated `flagship-shared` and `FlagShipClient.java` to Jackson 3 (`tools.jackson.core:jackson-databind`, `JsonMapper.builder().build()`, `tools.jackson.core.type.TypeReference`).
   - Switched `ArchitectureRulesTest` to core `com.tngtech.archunit:archunit:1.4.1` invoked from standard JUnit Jupiter `@Test` methods with `.withOptionalLayers(true)`.
-- **Verification Result**: All Maven coordinates and Spring Boot 4.0 APIs verified against Maven Central / Spring Boot 4.0 docs; full `mvn -B verify` execution requires pushing to GitHub Actions (JDK 21 / Maven not installed in this container).
+- **Verification Result**: All Maven coordinates and Spring Boot 4.0 APIs verified against Maven Central / Spring Boot 4.0 docs; confirmed `java-backend-and-sdk` (`mvn -B verify`) **PASSED** on GitHub Actions commit `184678e`.
+
+### CI-003: `npm install` Failed on GitHub Actions (`ERESOLVE` Between `vite@8.3.x` and `esbuild@^0.25.0`)
+- **Date**: 2026-11-20
+- **Description**: Both `FlagShip CI -> frontend-and-engine` and `Deploy FlagShip to GitHub Pages -> build` failed during `npm install --no-audit --no-fund` on commit `184678e`, leaving GitHub Pages serving the previous branch-based raw `index.html` (`/src/main.tsx`).
+- **Root Cause**: `package.json` pinned `"esbuild": "^0.25.0"` while `vite@8.3.8` declares `peerOptional esbuild@"^0.27.0 || ^0.28.0"`. `npm` strictly fails with `ERESOLVE` on this peer conflict (whereas `bun` ignored it in the local container).
+- **Affected Files**: `package.json`
+- **Debugging Process**: Inspected GitHub Actions run logs (`44800891394` & `44800891510`) and reproduced the exact `npm error code ERESOLVE` locally with `npm install --dry-run`.
+- **Solution**: Updated `"esbuild"` in `package.json` from `"^0.25.0"` to `"^0.28.0"`.
+- **Verification Result**: Tested `npm install --dry-run --no-audit --no-fund` in a clean temp directory with only `package.json` — resolved 303 packages cleanly with `EXIT_CODE=0`.
+
 
