@@ -6,8 +6,8 @@ import io.flagship.shared.EvaluationEngine.EvaluationResult;
 import io.flagship.shared.EvaluationEngine.FlagSnapshotItem;
 import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.MeterRegistry;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.core.type.TypeReference;
+import tools.jackson.databind.json.JsonMapper;
 
 import java.net.URI;
 import java.net.http.HttpClient;
@@ -33,7 +33,7 @@ public class FlagShipClient implements AutoCloseable {
 
     private final FlagShipProperties props;
     private final EvaluationEngine engine = new EvaluationEngine();
-    private final ObjectMapper mapper = new ObjectMapper();
+    private final JsonMapper mapper = JsonMapper.builder().build();
     private final HttpClient httpClient;
     private final ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor(r -> {
         Thread t = new Thread(r, "flagship-sdk-sync");
@@ -148,10 +148,13 @@ public class FlagShipClient implements AutoCloseable {
         }
     }
 
-    private Map<String, FlagSnapshotItem> parseSnapshot(String json) throws Exception {
-        Map<String, Object> root = mapper.readValue(json, new TypeReference<>() {});
+    private Map<String, FlagSnapshotItem> parseSnapshot(String json) {
+        Map<String, Object> root = mapper.readValue(json, new TypeReference<Map<String, Object>>() {});
         // Stores parsed items keyed by flagKey
-        return mapper.convertValue(root.getOrDefault("flagMap", Map.of()), new TypeReference<>() {});
+        return mapper.convertValue(
+                root.getOrDefault("flagMap", Map.of()),
+                new TypeReference<Map<String, FlagSnapshotItem>>() {}
+        );
     }
 
     private void loadSnapshotFromDisk() {
